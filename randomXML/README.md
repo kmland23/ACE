@@ -1,12 +1,5 @@
 
-randomXML creates XML files with randomized parameters within a certain range 
-
-
-### Examples
-* Custom Network ([stub](examples/custom_network_stub.py) | example)
-* Custom SubModule ([stub](examples/custom_submodule_stub.py) | [example](adept/network/net1d/lstm.py))
-* Custom Agent ([stub](examples/custom_agent_stub.py) | [example](adept/agent/actor_critic.py))
-* Custom Environment ([stub](examples/custom_environment_stub.py) | [example](adept/env/openai_gym.py))
+randomXML creates XML files with randomized parameters within a certain range
 
 ## Installation
 ```bash
