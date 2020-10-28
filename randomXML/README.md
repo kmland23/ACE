@@ -23,7 +23,5 @@ pip install .
 **Local (Single-node, Single-GPU)**
 * Best place to [start](randomMXL/randomMXL.py) if you're trying to understand code.
 
-## Performance
-* ~ 3,000 Steps/second = 12,000 FPS (Atari)
-#1,964,844.83
+
 
