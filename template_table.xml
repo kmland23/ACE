@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<mass_balance>
+    <ixx unit="SLUG*FT2"  max='6' distribution='uniform'> 1.95 </ixx >
+    <iyy unit="SLUG*FT2" min='2' max='2.5' distribution='uniform'> 1.55 </iyy>
+    <izz unit="SLUG*FT2" std='.5' max= '3.0' distribution='normal'> 1.91 </izz>
+    <izxy unit="SLUG*FT2"  min='-1' max='2' distribution="uniform" > 0 </izxy>
+    <ixz unit="SLUG*FT2"> 0 </ixz>
+    <iyz unit="SLUG*FT2"> 0 </iyz>
+    <emptywt unit="LBS"  min= '10' max ='15.0' distribution='uniform'> 13 </emptywt>
+    <location name="CG" unit="IN">
+        <x std='0' max="9" distribution='normal'> 36.4 </x>
+        <y min='-1.0'  max='8' distribution='uniform'> 0 </y>
+        <z min='2.10' max="73" distribution='uniform'> 4 </z>
+    </location>
+    <world name="CG" unit="IN">
+        <x min= '30' max='39' distribution='uniform'> 36.4 </x>
+        <y std='2.0' min='-1.0' distribution='normal'> 0 </y>
+        <z min='2' max ='6.2' distribution="uniform"> 4 </z>
+    </world>
+    <ixp unit="SLUG*FT2" min='-1.0' max='3' distribution='uniform' > 0 </ixp>
+    <aero_table>
+        1.2433  8
+        32.234  5403.29
+        23014   34e1
+        0.983   0.01
+        5       6
+        3       1
+    </aero_table>
+</mass_balance>
