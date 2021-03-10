@@ -6,7 +6,10 @@ import numpy as np
 import sys
 import xml.etree.ElementTree as ET
 import xml.dom.minidom
+import glob
+import os
 
+#changed
 
 # read in input, output files, and number of XML files
 def parse_command_line():
@@ -30,118 +33,135 @@ def convert(string):
     li = list(string.split(" "))
     return li
 
+args = parse_command_line()
 
-try:
-    # read in file for xml file number
-    args = parse_command_line()
-    tree = ET.parse(args.infile)
-    root = tree.getroot()
-except ET.ParseError as e:
-    exc_type, exc_obj, exc_tb = sys.exc_info()
-    print("The file is not in correct XML format. The error is on line "+str(exc_tb.tb_lineno)+".")
-    sys.exit()
+os.mkdir(args.output)
 
-k = 1
-while k <= args.xmlNumber:
+j = 1
+for file in glob.glob('/home/kristina/PycharmProjects/pythonProject4/'+str(args.infile)+'/*.xml'):
+    #print(file)
+    try:
+        # read in file for xml file number
+        #args = parse_command_line()
+        #!!!!!!!!!!!!!was args.infile
+        tree = ET.parse(file)
+        root = tree.getroot()
+    except ET.ParseError as e:
+        exc_type, exc_obj, exc_tb = sys.exc_info()
+        print("The file is not in correct XML format. The error is on line " + str(exc_tb.tb_lineno) + ".")
+        sys.exit()
 
-    i = 0
-    for child in tree.iter():
-        attribute = child.attrib
+    path = '/home/kristina/PycharmProjects/pythonProject4/'+args.output+'/sample' + str(j)
+    os.mkdir(path)
 
-        # if data is a table
-        if len(child.text.split()) > 1:
+    k = 1
+    while k <= args.xmlNumber:
 
-            # convert table to string
-            separated_string = convert(child.text)
-            updated_string = separated_string
+        i = 0
+        for child in tree.iter():
+            attribute = child.attrib
 
-            p = 0
+            # if data is a table
+            if len(child.text.split()) > 1:
 
-            # get each table element
-            for element in separated_string:
-                element = str(element)
+                # convert table to string
+                separated_string = convert(child.text)
+                updated_string = separated_string
 
-                if element and element.strip():
+                p = 0
 
-                    # replace original number with new random number
-                    if '\n' in element:
-                        try:
-                            element = str(np.random.uniform(.5 * (float(element)+.01), 1.5 * (float(element)+.01)))
-                            element = element + '\n'
-                        except ValueError:
-                            element = 'NA' + ' \n'
-                    else:
-                        try:
-                            element = str(np.random.uniform(.5 * (float(element)+.01), 1.5 * (float(element)+.01)))
-                        except ValueError:
-                            element = 'NA'
-                    updated_string[p] = element
+                # get each table element
+                for element in separated_string:
+                    element = str(element)
 
-                p = p + 1
-            # using list comprehension
-            listToStr = ' '.join([str(elem) for elem in updated_string])
-            child.text = (str(listToStr))
+                    if element and element.strip():
 
-    for child in tree.iter():
+                        # replace original number with new random number
+                        if '\n' in element:
+                            try:
+                                element = str(np.random.uniform(.5 * (float(element) + .01), 1.5 * (float(element) + .01)))
+                                element = element + '\n'
+                            except ValueError:
+                                element = 'NA' + ' \n'
+                        else:
+                            try:
+                                element = str(np.random.uniform(.5 * (float(element) + .01), 1.5 * (float(element) + .01)))
+                            except ValueError:
+                                element = 'NA'
+                        updated_string[p] = element
 
-        # get xml attributes in each xml line
-        attribute = child.attrib
+                    p = p + 1
+                # using list comprehension
+                listToStr = ' '.join([str(elem) for elem in updated_string])
+                child.text = (str(listToStr))
 
-        if attribute.get('distribution') == 'uniform':
+        for child in tree.iter():
 
-            # get variable values for distribution
-            min_out = attribute.get('min')
-            max_out = attribute.get('max')
+            # get xml attributes in each xml line
+            attribute = child.attrib
 
-            try:
-                # find random value
-                randomUniform = np.random.uniform(float(min_out), float(max_out))
-                child.text = str(randomUniform)
-                print(child.text)
+            if attribute.get('distribution') == 'uniform':
 
-            # except TypeError:
-            except TypeError:
-                print(
-                    "The max and min values must be strings of numbers. The error is in node " + str(
+                # get variable values for distribution
+                min_out = attribute.get('min')
+                max_out = attribute.get('max')
+
+                try:
+                    # find random value
+                    randomUniform = np.random.uniform(float(min_out), float(max_out))
+                    child.text = str(randomUniform)
+                    #print(child.text)
+
+                # except TypeError:
+                except TypeError:
+                    print(
+                        "The max and min values must be strings of numbers. The error is in node " + str(
+                            child.tag))
+                    child.text = child.text[2:len(child.text) - 2]
+                    continue
+
+            elif attribute.get('distribution') == 'normal':
+                std_out = attribute.get('std')
+                mean_out = attribute.get('mean')
+                if mean_out is None:
+                    mean_out = attribute.get('max')
+                    print('As no mean value exists, the max value is being used')
+
+                try:
+                    # find random value
+                    randomNormal = np.random.normal(float(std_out), float(mean_out))
+                except TypeError:
+                    print("The mean and std values must be strings of numbers. The error is in node " + str(
                         child.tag))
-                child.text = child.text[2:len(child.text)-2]
-                continue
+                    continue
 
-        elif attribute.get('distribution') == 'normal':
-            std_out = attribute.get('std')
-            mean_out = attribute.get('mean')
-            if mean_out is None:
-                mean_out = attribute.get('max')
-                print('As no mean value exists, the max value is being used')
+                child.text = str(randomNormal)
 
-            try:
-                # find random value
-                randomNormal = np.random.normal(float(std_out), float(mean_out))
-            except TypeError:
-                print("The mean and std values must be strings of numbers. The error is in node " + str(
-                        child.tag))
-                continue
+        # remove unnecessary data
+        for child in tree.iter():
+            child.attrib.pop("min", None)
+            child.attrib.pop("max", None)
+            child.attrib.pop("std", None)
+            child.attrib.pop("distribution", None)
+            child.attrib.pop("updated", None)
 
-            child.text = str(randomNormal)
+        # write tree to file
+        tree.write(str(k) + "_" + str(args.output))
 
-    # remove unnecessary data
-    for child in tree.iter():
-        child.attrib.pop("min", None)
-        child.attrib.pop("max", None)
-        child.attrib.pop("std", None)
-        child.attrib.pop("distribution", None)
-        child.attrib.pop("updated", None)
+        # make xml pretty
+        dom = xml.dom.minidom.parse(str(k) + "_" + str(args.output))  # or xml.dom.minidom.parseString(xml_string)
+        pretty_xml_as_string = dom.toprettyxml()
 
-    # write tree to file
-    tree.write(str(k) + "_" + str(args.output))
+        os.remove(str(k) + "_" + str(args.output))
 
-    # make xml pretty
-    dom = xml.dom.minidom.parse(str(k)+"_"+str(args.output))  # or xml.dom.minidom.parseString(xml_string)
-    pretty_xml_as_string = dom.toprettyxml()
-    
-    # write final file
-    f = open(str(k) + "_p_" + str(args.output), 'a')
-    f.write(pretty_xml_as_string)
-    f.close()
+        fileParts=file.split('/')
+        fileLast=fileParts[-1].split('.')
+        fileName=fileLast[0]
 
-    k = k + 1
+        # write final file
+        f = open(args.output+"/sample"+str(j)+"/"+fileName+"_"+str(k)+".xml", 'a')
+        f.write(pretty_xml_as_string)
+        f.close()
+
+        k = k + 1
+    j = j + 1
