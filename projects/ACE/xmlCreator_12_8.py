@@ -9,7 +9,7 @@ import xml.dom.minidom
 import glob
 import os
 
-#changes
+#change
 
 # read in input, output files, and number of XML files
 def parse_command_line():
