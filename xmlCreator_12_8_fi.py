@@ -17,7 +17,7 @@ def parse_command_line():
 
 
 # open file
-def read_file(file_name):
+def read_file(file_name: str):
     """
        read file and place in message
 
@@ -34,7 +34,7 @@ def read_file(file_name):
 
 
 # separate different values in a string by space
-def convert(string):
+def convert(string: str):
     """
        Creates list of words from string
 
@@ -57,12 +57,13 @@ if __name__ == "__main__":
     import glob
     import os
 
-    args = parse_command_line()
 
+    args = parse_command_line()
     os.mkdir(args.output)
 
     j = 1
-    for file in glob.glob('/home/kristina/PycharmProjects/pythonProject4/'+str(args.infile)+'/*.xml'):
+    # for any xml file in the directory
+    for file in glob.glob('/home/kristina/PycharmProjects/pythonProject4/format_output'+'/*.xml'):
 
         try:
             # read in file for xml file number
@@ -77,6 +78,7 @@ if __name__ == "__main__":
         os.mkdir(path)
 
         k = 1
+        # while still have more xml files to write
         while k <= args.xmlNumber:
 
             i = 0
@@ -94,6 +96,7 @@ if __name__ == "__main__":
 
                     # get each table element
                     for element in separated_string:
+
                         element = str(element)
 
                         if element and element.strip():
@@ -182,7 +185,7 @@ if __name__ == "__main__":
             fileName = fileLast[0]
 
             # write final file
-            f = open(args.output+"/sample"+str(j)+"/"+fileName+"_"+str(k)+".xml", 'a')
+            f = open(args.output+"/sample"+str(j)+"/"+args.infile+"_"+str(k)+".xml", 'a')
             f.write(pretty_xml_as_string)
             f.close()
 
