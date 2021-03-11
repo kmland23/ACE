@@ -1,15 +1,6 @@
 # This program takes in an example XML file and creates a given number of random XML files
 # If a string is added to the table of floats an NA will replace the string
 
-import argparse
-import numpy as np
-import sys
-import xml.etree.ElementTree as eT
-import xml.dom.minidom
-import glob
-import os
-
-
 # read in input, output files, and number of XML files
 def parse_command_line():
     """
@@ -66,13 +57,12 @@ if __name__ == "__main__":
     import glob
     import os
 
-    # parse command line
     args = parse_command_line()
+
     os.mkdir(args.output)
 
     j = 1
-    # for every XML file in the directory
-    for file in glob.glob('/home/kristina/PycharmProjects/pythonProject4/' + str(args.infile) + '/*.xml'):
+    for file in glob.glob('/home/kristina/PycharmProjects/pythonProject4/'+str(args.infile)+'/*.xml'):
 
         try:
             # read in file for xml file number
@@ -83,11 +73,10 @@ if __name__ == "__main__":
             print("The file is not in correct XML format. The error is on line " + str(exc_tb.tb_lineno) + ".")
             sys.exit()
 
-        path = '/home/kristina/PycharmProjects/pythonProject4/' + args.output + '/sample' + str(j)
+        path = '/home/kristina/PycharmProjects/pythonProject4/'+args.output+'/sample' + str(j)
         os.mkdir(path)
 
         k = 1
-        # number of random XML files to create
         while k <= args.xmlNumber:
 
             i = 0
@@ -112,15 +101,15 @@ if __name__ == "__main__":
                             # replace original number with new random number
                             if '\n' in element:
                                 try:
-                                    element = str(
-                                        np.random.uniform(.5 * (float(element) + .01), 1.5 * (float(element) + .01)))
+                                    element = str(np.random.uniform(.5 * (float(element) + .01), 1.5 * (float(element)
+                                                                                                        + .01)))
                                     element = element + '\n'
                                 except ValueError:
                                     element = 'NA' + ' \n'
                             else:
                                 try:
-                                    element = str(
-                                        np.random.uniform(.5 * (float(element) + .01), 1.5 * (float(element) + .01)))
+                                    element = str(np.random.uniform(.5 * (float(element) + .01), 1.5 * (float(element)
+                                                                                                        + .01)))
                                 except ValueError:
                                     element = 'NA'
                             updated_string[p] = element
@@ -145,7 +134,6 @@ if __name__ == "__main__":
                         # find random value
                         randomUniform = np.random.uniform(float(min_out), float(max_out))
                         child.text = str(randomUniform)
-                        # print(child.text)
 
                     # except TypeError:
                     except TypeError:
@@ -187,16 +175,14 @@ if __name__ == "__main__":
             dom = xml.dom.minidom.parse(str(k) + "_" + str(args.output))  # or xml.dom.minidom.parseString(xml_string)
             pretty_xml_as_string = dom.toprettyxml()
 
-            # remove extra files
             os.remove(str(k) + "_" + str(args.output))
 
-            # get input filename to name output
             fileParts = file.split('/')
             fileLast = fileParts[-1].split('.')
             fileName = fileLast[0]
 
             # write final file
-            f = open(args.output + "/sample" + str(j) + "/" + fileName + "_" + str(k) + ".xml", 'a')
+            f = open(args.output+"/sample"+str(j)+"/"+fileName+"_"+str(k)+".xml", 'a')
             f.write(pretty_xml_as_string)
             f.close()
 
