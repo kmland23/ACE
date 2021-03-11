@@ -19,8 +19,7 @@ def parse_command_line():
 
     parser = argparse.ArgumentParser()
     parser.add_argument("infile", type=str, help="input filename")
-    parser.add_argument("output", help="output filename")
-    parser.add_argument('xmlNumber', type=int, help='an integer for number of xml files')
+    #parser.add_argument("output", help="output filename")
     args_in = parser.parse_args()
     return args_in
 
@@ -61,94 +60,108 @@ if __name__ == "__main__":
     import argparse
     from bs4 import BeautifulSoup
     from typing import List
+    import glob
+    import os
 
-    # read in using beautiful soup which will place a symbol on every ill-formed line
     args = parse_command_line()
-    infile = open(args.infile, "r")
-    contents = infile.read()
-    soup = str(BeautifulSoup(contents, 'xml'))
+    os.mkdir('format_output')
 
-    # write to xml file to be able to locate errors in input data
-    f = open("soup_xml.xml", "w")
-    f.write(soup)
-    f.close()
 
-    # read xml with errors marked
-    args = parse_command_line()
-    message = open('soup_xml.xml', "r+")
-    message_lines = message.readlines()
+    j = 1
+    # for any xml file in the directory
+    for file in glob.glob('/home/kristina/PycharmProjects/pythonProject4/' + str(args.infile) + '/*.xml'):
 
-    i = 0
-    while i < len(message_lines) - 1:
+        #path = '/home/kristina/PycharmProjects/pythonProject4/'+args.output
+        #os.mkdir(path)
 
-        line = (message_lines[i])
+        # read in using beautiful soup which will place a symbol on every ill-formed line
+        input_file = open(file, "r")
+        contents = input_file.read()
+        soup = str(BeautifulSoup(contents, 'xml'))
 
-        line_substring = line[line.find('>') + 1:line.rfind('<')]
-        line_substring = line_substring.split()
+        # write to xml file to be able to locate errors in input data
+        f = open("soup_xml.xml", "w")
+        f.write(soup)
+        f.close()
 
-        # if there is an error symbol
-        if line.count('&gt;') > 0:
+        # read xml with errors marked
+        args = parse_command_line()
+        message = open('soup_xml.xml', "r+")
+        message_lines = message.readlines()
 
-            # fixes no tag
-            # get tag
-            tag_line = line.split()
-            tag_line = tag_line[0]
+        i = 0
+        while i < len(message_lines) - 1:
 
-            # if no tag, label no tag
-            if (tag_line.count('=')) > 0:
-                message_lines[i] = re.sub(str('>.+?<'), ' > ' + str(line_substring) + ' < ', str(line))
-                message_lines[i] = re.sub(str('<.+?>'), '<' + 'no_tag' + ' > ', str(message_lines[i]))
-                continue
+            line = (message_lines[i])
 
-            line_substring = line_substring[len(line_substring) - 1:len(line_substring)]
+            line_substring = line[line.find('>') + 1:line.rfind('<')]
+            line_substring = line_substring.split()
 
-            # if there is a units attributes
-            if line.count('unit') > 0:
+            # if there is an error symbol
+            if line.count('&gt;') > 0:
 
-                # find unit start index
-                line = line.split()
-                indexUnit = message_lines[i].find('unit')
+                # fixes no tag
+                # get tag
+                tag_line = line.split()
+                tag_line = tag_line[0]
 
-                # find unit attribute end
-                firstIndex = message_lines[i].find('"', indexUnit)
-                endIndex = message_lines[i].find('"', firstIndex + 1)
+                # if no tag, label no tag
+                if (tag_line.count('=')) > 0:
+                    message_lines[i] = re.sub(str('>.+?<'), ' > ' + str(line_substring) + ' < ', str(line))
+                    message_lines[i] = re.sub(str('<.+?>'), '<' + 'no_tag' + ' > ', str(message_lines[i]))
+                    continue
 
-                line_substring2 = line[0]
-                line_substring2 = line_substring2[1:]
-                line_substring2 = list(line_substring2)
+                line_substring = line_substring[len(line_substring) - 1:len(line_substring)]
 
-                # find <> indices
-                bracket1 = message_lines[i].find('<')
-                bracket2 = message_lines[i].find('>')
+                # if there is a units attributes
+                if line.count('unit') > 0:
 
-                # find string inside <>
-                line_substring2 = line_substring2[bracket1:bracket2 - 1]
-                line_substring2 = ''.join(line_substring2)
+                    # find unit start index
+                    line = line.split()
+                    indexUnit = message_lines[i].find('unit')
 
-                # get unit attribute
-                line_substring3 = message_lines[i]
-                line_substring3 = line_substring3[indexUnit:endIndex + 1]
+                    # find unit attribute end
+                    firstIndex = message_lines[i].find('"', indexUnit)
+                    endIndex = message_lines[i].find('"', firstIndex + 1)
 
-                mLine = get_format(i, line, line_substring)
+                    line_substring2 = line[0]
+                    line_substring2 = line_substring2[1:]
+                    line_substring2 = list(line_substring2)
 
-                # add in unit attribute
-                mLine = mLine.split()
-                mLine[1] = line_substring3 + '>'
-                mLine = ' '.join(mLine)
-                message_lines[i] = mLine
+                    # find <> indices
+                    bracket1 = message_lines[i].find('<')
+                    bracket2 = message_lines[i].find('>')
 
-            else:
+                    # find string inside <>
+                    line_substring2 = line_substring2[bracket1:bracket2 - 1]
+                    line_substring2 = ''.join(line_substring2)
 
-                get_format(i, line, line_substring)
+                    # get unit attribute
+                    line_substring3 = message_lines[i]
+                    line_substring3 = line_substring3[indexUnit:endIndex + 1]
 
-        message_lines[i] = message_lines[i].replace('[', "")
-        message_lines[i] = message_lines[i].replace(']', "")
-        message_lines[i] = message_lines[i].replace("'", "")
-        print(message_lines[i])
-        i = i + 1
+                    mLine = get_format(i, line, line_substring)
 
-    # write file
-    message_lines = ' '.join([str(elem) for elem in message_lines])
-    f = open("formatted.xml", 'a')
-    f.write(str(message_lines))
-    f.close()
+                    # add in unit attribute
+                    mLine = mLine.split()
+                    mLine[1] = line_substring3 + '>'
+                    mLine = ' '.join(mLine)
+                    message_lines[i] = mLine
+
+                else:
+
+                    get_format(i, line, line_substring)
+
+            message_lines[i] = message_lines[i].replace('[', "")
+            message_lines[i] = message_lines[i].replace(']', "")
+            message_lines[i] = message_lines[i].replace("'", "")
+            print(message_lines[i])
+            i = i + 1
+
+        # write file
+        message_lines = ' '.join([str(elem) for elem in message_lines])
+        f = open("format_output/"+args.infile+"_"+str(j)+".xml", 'a')
+        f.write(str(message_lines))
+        f.close()
+
+        j=j+1
